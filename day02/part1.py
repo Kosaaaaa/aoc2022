@@ -9,23 +9,34 @@ import support
 
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
+shape = {'R': 1, 'P': 2, 'S': 3}
+win = {'R': 'S', 'P': 'R', 'S': 'P'}
+trans = {
+    'A': 'R', 'B': 'P', 'C': 'S',
+    'X': 'R', 'Y': 'P', 'Z': 'S',
+}
+
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    for k, v in trans.items():
+        s = s.replace(k, v)
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    n = 0
+    for a, b in [line.split() for line in s.splitlines()]:
+        if a == b:
+            n += 3
+        elif win[a] != b:
+            n += 6
+        n += shape[b]
+    return n
 
 
 INPUT_S = '''\
-
+A Y
+B X
+C Z
 '''
-EXPECTED = 1
+EXPECTED = 15
 
 
 @pytest.mark.parametrize(
