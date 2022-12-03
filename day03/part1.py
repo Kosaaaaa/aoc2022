@@ -11,21 +11,31 @@ INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
-
+    priorities_sum = 0
     lines = s.splitlines()
     for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+        part1 = line[:len(line) // 2]
+        part2 = line[len(line) // 2:]
+
+        s, = set(part1) & set(part2)
+
+        if s.islower():
+            priorities_sum += 1 + (ord(s) - ord('a'))
+        else:
+            priorities_sum += 27 + (ord(s) - ord('A'))
+
+    return priorities_sum
 
 
 INPUT_S = '''\
-
+vJrwpWtwJgWrhcsFMMfFFhFp
+jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+PmmdzqPrVvPwwTWBwg
+wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+ttgJtRGJQctTZtZT
+CrZsJsPPZsGzwwsLwLmpwMDw
 '''
-EXPECTED = 1
+EXPECTED = 157
 
 
 @pytest.mark.parametrize(
