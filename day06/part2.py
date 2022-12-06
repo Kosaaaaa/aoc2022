@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import collections
 import os.path
 
 import pytest
@@ -11,21 +12,21 @@ INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    marker_deque: collections.deque[str] = collections.deque(maxlen=14)
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    for i, c in enumerate(s.strip(), start=1):
+        marker_deque.append(c)
+
+        if len(marker_deque) == marker_deque.maxlen and len(set(marker_deque)) == marker_deque.maxlen:
+            return i
+
+    raise ValueError('No marker Found')
 
 
 INPUT_S = '''\
-
+mjqjpqmgbljsphdztnvjfqwrcgsmlb
 '''
-EXPECTED = 1
+EXPECTED = 19
 
 
 @pytest.mark.parametrize(
