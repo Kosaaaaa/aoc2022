@@ -11,21 +11,61 @@ INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    coords = support.parse_coords_int(s)
+    visible = set()
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    y_min, x_min = min(coords)
+    y_max, x_max = max(coords)
+
+    for y in range(y_min, y_max + 1):
+        # down
+        val = coords[(y, x_min)]
+        visible.add((y, x_min))
+        for x in range(x_min + 1, x_max + 1):
+            cand = (y, x)
+            if coords[cand] > val:
+                visible.add(cand)
+                val = coords[cand]
+
+        # up
+        val = coords[(y, x_max)]
+        visible.add((y, x_max))
+        for x in range(x_max, -1, -1):
+            cand = (y, x)
+            if coords[cand] > val:
+                visible.add(cand)
+                val = coords[cand]
+
+    for x in range(x_min, x_max + 1):
+        # right
+        val = coords[(y_min, x)]
+        visible.add((y_min, x))
+        for y in range(y_min + 1, y_max + 1):
+            cand = (y, x)
+            if coords[cand] > val:
+                visible.add(cand)
+                val = coords[cand]
+
+        # left
+        val = coords[(y_max, x)]
+        visible.add((y_max, x))
+        for y in range(y_max, -1, -1):
+            cand = (y, x)
+            if coords[cand] > val:
+                visible.add(cand)
+                val = coords[cand]
+
+    return len(visible)
 
 
 INPUT_S = '''\
-
+30373
+25512
+65332
+33549
+35390
 '''
-EXPECTED = 1
+EXPECTED = 21
 
 
 @pytest.mark.parametrize(
