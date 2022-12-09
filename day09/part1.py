@@ -9,17 +9,29 @@ import support
 
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
+DIRECTION_MAP = {
+    'R': support.Direction4.RIGHT,
+    'U': support.Direction4.UP,
+    'L': support.Direction4.LEFT,
+    'D': support.Direction4.DOWN,
+}
+
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    head = tail = (0, 0)
+    seen = {tail}
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    for line in s.splitlines():
+        dir_s, n_s = line.split()
+        move = DIRECTION_MAP[dir_s]
+
+        for _ in range(int(n_s)):
+            head = move.apply(*head)
+            if abs(head[0] - tail[0]) >= 2 or abs(head[1] - tail[1]) >= 2:
+                tail = move.opposite.apply(*head)
+                seen.add(tail)
+
+    return len(seen)
 
 
 INPUT_S = '''\
