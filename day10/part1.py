@@ -13,15 +13,32 @@ TARGET_CYCLES = {20, 60, 100, 140, 180, 220}
 
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    result_sum = 0
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    x = 1
+    lines = iter(s.splitlines())
+    instr_n = 0
+    instr = 'noop'
+
+    for i in range(1, max(TARGET_CYCLES) + 1):
+        if instr_n == 0:
+            instr = next(lines)
+            if instr == 'noop':
+                instr_n = 1
+            elif instr.startswith('addx '):
+                instr_n = 2
+
+        instr_n -= 1
+
+        if i in TARGET_CYCLES:
+            result_sum += x * i
+
+        if instr_n == 0:
+            if instr.startswith('addx '):
+                _, n_s = instr.split()
+                x += int(n_s)
+
+    return result_sum
 
 
 INPUT_S = '''\
