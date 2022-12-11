@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import os.path
+from typing import Callable
+from typing import NamedTuple
 
 import pytest
 
@@ -10,22 +13,93 @@ import support
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 
-def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+def add(val: int, n: int) -> int:
+    return val + n
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+
+def mult(val: int, n: int) -> int:
+    return val * n
+
+
+def square(val: int) -> int:
+    return val * val
+
+
+class Monk(NamedTuple):
+    items: list[int]
+    fn: Callable[[int], int]
+    mod: int
+    true_target: int
+    false_target: int
+
+
+def compute(s: str) -> int:
+    monks = []
+    for monk_data in s.split('\n\n'):
+        monk_lines = monk_data.splitlines()
+        starting = [int(s) for s in monk_lines[1].split(': ')[1].split(', ')]
+        if 'old * old' in monk_lines[2]:
+            fn = square
+        elif ' + ' in monk_lines[2]:
+            fn = functools.partial(add, n=int(monk_lines[2].split()[-1]))
+        elif ' * ' in monk_lines[2]:
+            fn = functools.partial(mult, n=int(monk_lines[2].split()[-1]))
+        else:
+            raise AssertionError(monk_lines[2])
+        mod = int(monk_lines[3].split()[-1])
+        true_target = int(monk_lines[4].split()[-1])
+        false_target = int(monk_lines[5].split()[-1])
+        monks.append(Monk(starting, fn, mod, true_target, false_target))
+
+    seen = [0] * len(monks)
+
+    for _ in range(20):
+        for i, monk in enumerate(monks):
+            for item in monk.items:
+                seen[i] += 1
+
+                item = monk.fn(item) // 3
+                if item % monk.mod == 0:
+                    monks[monk.true_target].items.append(item)
+                else:
+                    monks[monk.false_target].items.append(item)
+
+            monk.items.clear()
+
+    seen.sort()
+    return seen[-1] * seen[-2]
 
 
 INPUT_S = '''\
+Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
 
+Monkey 1:
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
+
+Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
+
+Monkey 3:
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1
 '''
-EXPECTED = 1
+EXPECTED = 10605
 
 
 @pytest.mark.parametrize(
