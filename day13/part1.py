@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import ast
+import itertools
 import os.path
 
 import pytest
@@ -9,23 +11,72 @@ import support
 
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
+ListLike = int | list['ListLike']
+
+
+def compare(lhs: ListLike, rhs: ListLike) -> int:
+    if isinstance(lhs, int) and not isinstance(rhs, int):
+        lhs = [lhs]
+    elif not isinstance(lhs, int) and isinstance(rhs, int):
+        rhs = [rhs]
+    if isinstance(lhs, int) and isinstance(rhs, int):
+        return lhs - rhs
+    elif isinstance(lhs, list) and isinstance(rhs, list):
+        for a, b in itertools.zip_longest(lhs, rhs):
+            if a is None:
+                return -1
+            elif b is None:
+                return 1
+
+            compared = compare(a, b)
+            if compared != 0:
+                return compared
+        else:
+            return 0
+    else:
+        raise AssertionError('unreachable')
+
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    result = 0
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    for i, pair in enumerate(s.split('\n\n'), 1):
+        l1_s, l2_s = pair.splitlines()
+        l1 = ast.literal_eval(l1_s)
+        l2 = ast.literal_eval(l2_s)
+
+        if compare(l1, l2) <= 0:
+            result += i
+
+    return result
 
 
 INPUT_S = '''\
+[1,1,3,1,1]
+[1,1,5,1,1]
 
+[[1],[2,3,4]]
+[[1],4]
+
+[9]
+[[8,7,6]]
+
+[[4,4],4,4]
+[[4,4],4,4,4]
+
+[7,7,7,7]
+[7,7,7]
+
+[]
+[3]
+
+[[[]]]
+[[]]
+
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]
 '''
-EXPECTED = 1
+EXPECTED = 13
 
 
 @pytest.mark.parametrize(
