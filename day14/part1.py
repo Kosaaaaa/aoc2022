@@ -9,17 +9,47 @@ import support
 
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
+SAND_PT = (500, 0)
+
 
 def compute(s: str) -> int:
-    numbers = support.parse_numbers_split(s)
-    for n in numbers:
-        pass
+    coords = set()
+    for line in s.splitlines():
+        points = line.split(' -> ')
+        prev_x, prev_y = support.parse_point_comma(points[0])
+        for point in points[1:]:
+            cand_x, cand_y = support.parse_point_comma(point)
+            if cand_x == prev_x:
+                for y in range(min(cand_y, prev_y), max(cand_y, prev_y) + 1):
+                    coords.add((cand_x, y))
+            else:
+                for x in range(min(cand_x, prev_x), max(cand_x, prev_x) + 1):
+                    coords.add((x, cand_y))
+            prev_x, prev_y = cand_x, cand_y
 
-    lines = s.splitlines()
-    for line in lines:
-        pass
-    # TODO: implement solution here!
-    return 0
+    max_y = max(y for _, y in coords)
+
+    i = 0
+
+    while True:
+        px, py = SAND_PT
+        while True:
+            if (px, py + 1) not in coords:
+                py += 1
+            elif (px - 1, py + 1) not in coords:
+                px -= 1
+                py += 1
+            elif (px + 1, py + 1) not in coords:
+                px += 1
+                py += 1
+            else:
+                coords.add((px, py))
+                break
+
+            if py > max_y:
+                return i
+
+        i += 1
 
 
 INPUT_S = '''\
